@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: whatsappai
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+
+logging:
+  level:
+    root: INFO
