@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5434/whatsappai_db
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: localhost
+      port: 6381
+      password: 2129f0354d1e356174e5
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: false
+
+
+evolution:
+  api:
+    base-url: http://localhost:8081
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
