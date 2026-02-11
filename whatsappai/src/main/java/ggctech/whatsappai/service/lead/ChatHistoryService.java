@@ -7,9 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,14 +34,23 @@ public class ChatHistoryService {
         chatHistoryRepository.save(chatHistory);
     }
 
-    public String lastMessages(String instanceId, String remoteJid) {
+    public List<Map<String, String>> lastMessages(String instanceId, String remoteJid) {
+
         List<ChatHistory> messages = getLastMessage(instanceId, remoteJid);
-        if (messages.isEmpty()) {
-            return null;
-        }
-        return messages
-                .stream()
-                .map(msg -> msg.getSender().name() + ": " + msg.getMessage())
-                .collect(Collectors.joining("\n"));
+        Collections.reverse(messages);
+        return messages.stream()
+                .map(msg -> Map.of(
+                        "role", mapRole(msg.getSender()),
+                        "content", msg.getMessage()
+                ))
+                .toList();
     }
+
+    private String mapRole(Sender sender) {
+        return switch (sender) {
+            case BOT -> "assistant";
+            case USER -> "user";
+        };
+    }
+
 }

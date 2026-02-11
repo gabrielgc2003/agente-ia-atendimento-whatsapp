@@ -9,6 +9,9 @@ import ggctech.whatsappai.service.lead.LeadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,17 +33,10 @@ public class ConversationFinalizer {
             return;
         }
 
-        // Limpeza de estado
         bufferService.delete(conversationKey);
         lockService.delete(conversationKey);
 
-        // Busca memória
-        String memory = chatHistoryService.lastMessages(
-                dto.getInstanceId(),
-                dto.getRemoteJid()
-        );
-
-        // Persistência de histórico USER
+        // 1️⃣ Persistir USER primeiro
         chatHistoryService.saveMessage(
                 dto.getInstanceId(),
                 dto.getRemoteJid(),
@@ -48,25 +44,36 @@ public class ConversationFinalizer {
                 Sender.USER
         );
 
-        // Dados dinâmicos
+        // 2️⃣ Buscar histórico estruturado
+        List<Map<String, String>> history =
+                chatHistoryService.lastMessages(
+                        dto.getInstanceId(),
+                        dto.getRemoteJid()
+                );
+
+        // 3️⃣ Base prompt + rotas
+        String basePrompt = dto.getMessageConfig().getBasePrompt();
         String routes = leadService.getRoutes(
                 dto.getInstanceId(),
                 dto.getRemoteJid()
         );
 
-        String basePrompt = dto.getMessageConfig().getBasePrompt();
+        String systemPrompt = promptBuilder.build(basePrompt, routes);
 
-        // Prompt final
-        String prompt = promptBuilder.build(
-                basePrompt,
-                routes,
-                memory
-        );
+        // 4️⃣ Montar lista final igual n8n
+        List<Map<String, String>> messages = new ArrayList<>();
 
-        // Chamada IA e espera o retorno para enviar a resposta
-        String response = messageService.sendMessageToAgent(finalBuffer, prompt);
+        messages.add(Map.of(
+                "role", "system",
+                "content", systemPrompt
+        ));
 
-        // Persistência de histórico IA
+        messages.addAll(history);
+
+        // 5️⃣ Chamar OpenAI passando array real
+        String response = messageService.sendMessageToAgent(messages);
+
+        // 6️⃣ Persistir BOT
         chatHistoryService.saveMessage(
                 dto.getInstanceId(),
                 dto.getRemoteJid(),
@@ -75,8 +82,6 @@ public class ConversationFinalizer {
         );
 
         messageService.sendMessageToUser(response, dto);
-
-
     }
 }
 

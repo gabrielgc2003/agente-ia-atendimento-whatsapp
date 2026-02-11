@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface ChatHistoryRepository extends JpaRepository<ChatHistory, UUID> {
-    @Query("SELECT ch FROM ChatHistory ch WHERE ch.instanceId = :instanceId AND ch.remoteJid = :remoteJid ORDER BY ch.createdAt DESC")
+    @Query("SELECT ch FROM ChatHistory ch WHERE ch.instanceId = :instanceId AND ch.remoteJid = :remoteJid ORDER BY ch.createdAt DESC LIMIT :limit")
     List<ChatHistory> getLastMessage(String instanceId, String remoteJid, int limit);
 }

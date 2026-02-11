@@ -36,12 +36,7 @@ public class OpenAiService {
     /* =========================
        TEXTO → TEXTO
        ========================= */
-    public String chat(String userMessage, String systemPrompt) {
-
-        List<Map<String, Object>> messages = List.of(
-                Map.of("role", "system", "content", systemPrompt),
-                Map.of("role", "user", "content", userMessage)
-        );
+    public String chat(List<Map<String, String>> messages) {
 
         Map<String, Object> body = Map.of(
                 "model", "gpt-4.1-mini",
