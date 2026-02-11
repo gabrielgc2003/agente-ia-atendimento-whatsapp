@@ -1,5 +1,6 @@
 package ggctech.whatsappai.service.conversation;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -7,6 +8,9 @@ import java.time.Duration;
 
 @Service
 public class ConversationLockService {
+
+    @Value("${config.lock.timer}")
+    private int lockSeconds;
 
     private final StringRedisTemplate redis;
 
@@ -25,7 +29,7 @@ public class ConversationLockService {
                 redis.opsForValue().setIfAbsent(
                         "lock:" + conversationKey,
                         "true",
-                        Duration.ofSeconds(45)
+                        Duration.ofSeconds(lockSeconds)
                 )
         );
     }

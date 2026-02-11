@@ -10,6 +10,12 @@ server:
 openai:
   api-key: ${OPENAI_API_KEY}
 
+config:
+  lock:
+    timer: ${LOCK_SECONDS}
+  finalize:
+    timer: ${FINALIZE_SECONDS}
+
 logging:
   level:
     root: INFO
