@@ -17,13 +17,13 @@ spring:
     password: ${RABBITMQ_PASSWORD}
     virtual-host: ${RABBITMQ_VHOST}
 
-    jpa:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
       hibernate:
-        ddl-auto: update
-      properties:
-        hibernate:
-          temp:
-            use_jdbc_metadata_defaults: false
+        temp:
+          use_jdbc_metadata_defaults: false
 
 evolution:
   api:
