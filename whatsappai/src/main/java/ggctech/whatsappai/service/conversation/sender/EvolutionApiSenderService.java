@@ -31,27 +31,38 @@ public class EvolutionApiSenderService implements MessageSenderService {
         ScheduledExecutorService executor =
                 executionRegistry.getExecutor(dto.getInstanceId(), dto.getRemoteJid());
 
-        List<String> parts = splitMessage(message);
+        executor.execute(() -> {
 
-        long cumulativeDelay = initialDelay();
+            List<String> parts = splitMessage(message);
 
-        for (String part : parts) {
+            try {
 
-            long typingTime = calculateDelayBySize(part);
+                Thread.sleep(initialDelay());
 
-            long sendDelay = cumulativeDelay;
+                for (String part : parts) {
 
-            executor.schedule(() -> {
-                typingSimulation(dto, (int) typingTime);
-            }, sendDelay - typingTime, TimeUnit.MILLISECONDS);
+                    int typingTime = (int) calculateDelayBySize(part);
 
-            executor.schedule(() -> {
-                sendPart(part, dto);
-            }, sendDelay, TimeUnit.MILLISECONDS);
+                    // 1️⃣ Simula digitando
+                    typingSimulation(dto, typingTime);
 
-            cumulativeDelay += typingTime;
-        }
+                    // 2️⃣ Espera o tempo da digitação
+                    Thread.sleep(typingTime);
+
+                    // 3️⃣ Envia mensagem
+                    sendPart(part, dto);
+
+                    // Pequena pausa natural entre mensagens
+                    Thread.sleep(500);
+                }
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+        });
     }
+
 
     private void sendPart(String part, IncomingMessageDTO dto) {
 
