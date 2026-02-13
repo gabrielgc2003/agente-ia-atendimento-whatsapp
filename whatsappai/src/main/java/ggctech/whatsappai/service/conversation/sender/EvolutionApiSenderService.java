@@ -35,12 +35,12 @@ public class EvolutionApiSenderService implements MessageSenderService {
 
         long delay = initialDelay();
 
-        typingSimulation(dto);
+
 
         for (String part : parts) {
 
             long sendDelay = delay;
-
+            typingSimulation(dto, (int) sendDelay);
             executor.schedule(
                     () -> sendPart(part, dto),
                     sendDelay,
@@ -75,7 +75,7 @@ public class EvolutionApiSenderService implements MessageSenderService {
         );
     }
 
-    private void typingSimulation(IncomingMessageDTO dto) {
+    private void typingSimulation(IncomingMessageDTO dto, int delay) {
         String url = baseUrl + "/chat/sendPresence/" + dto.getInstanceName();
 
         HttpHeaders headers = new HttpHeaders();
@@ -85,7 +85,8 @@ public class EvolutionApiSenderService implements MessageSenderService {
         EvolutionChatPresenceRequest body =
                 new EvolutionChatPresenceRequest(
                         dto.getRemoteJid(),
-                        "composing"
+                        "composing",
+                         delay
                 );
 
         HttpEntity<EvolutionChatPresenceRequest> request =
