@@ -1,5 +1,6 @@
 package ggctech.whatsappai.service.conversation.sender;
 
+import ggctech.whatsappai.domain.dto.EvolutionChatPresenceRequest;
 import ggctech.whatsappai.domain.dto.EvolutionTextMessageRequest;
 import ggctech.whatsappai.domain.dto.IncomingMessageDTO;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class EvolutionApiSenderService implements MessageSenderService {
 
-    private final ScheduledExecutorService scheduler;
+    private final InstanceExecutionRegistry  executionRegistry;
     private final RestTemplate evolutionRestTemplate;
 
     @Value("${evolution.api.base-url}")
@@ -27,15 +28,20 @@ public class EvolutionApiSenderService implements MessageSenderService {
     @Override
     public void sendMessage(String message, IncomingMessageDTO dto) {
 
+        ScheduledExecutorService executor =
+                executionRegistry.getExecutor(dto.getInstanceId(), dto.getRemoteJid());
+
         List<String> parts = splitMessage(message);
 
         long delay = initialDelay();
+
+        typingSimulation(dto);
 
         for (String part : parts) {
 
             long sendDelay = delay;
 
-            scheduler.schedule(
+            executor.schedule(
                     () -> sendPart(part, dto),
                     sendDelay,
                     TimeUnit.MILLISECONDS
@@ -69,6 +75,29 @@ public class EvolutionApiSenderService implements MessageSenderService {
         );
     }
 
+    private void typingSimulation(IncomingMessageDTO dto) {
+        String url = baseUrl + "/chat/sendPresence/" + dto.getInstanceName();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("apikey", dto.getInstanceId());
+
+        EvolutionChatPresenceRequest body =
+                new EvolutionChatPresenceRequest(
+                        dto.getRemoteJid(),
+                        "composing"
+                );
+
+        HttpEntity<EvolutionChatPresenceRequest> request =
+                new HttpEntity<>(body, headers);
+
+        evolutionRestTemplate.postForEntity(
+                url,
+                request,
+                Void.class
+        );
+    }
+
     private String sanitizeText(String text) {
         return text.replace("\"", "'"); // mesmo replace que você fazia no n8n
     }
@@ -82,6 +111,7 @@ public class EvolutionApiSenderService implements MessageSenderService {
     }
 
     private long calculateDelayBySize(String text) {
-        return Math.max(800, (text.length() * 1000L) / 40);
+
+        return Math.max(800, (text.length() * 1000L) / 20);
     }
 }
