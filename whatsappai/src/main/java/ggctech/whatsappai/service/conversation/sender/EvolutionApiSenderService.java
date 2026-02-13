@@ -33,21 +33,23 @@ public class EvolutionApiSenderService implements MessageSenderService {
 
         List<String> parts = splitMessage(message);
 
-        long delay = initialDelay();
-
-
+        long cumulativeDelay = initialDelay();
 
         for (String part : parts) {
 
-            long sendDelay = delay;
-            typingSimulation(dto, (int) sendDelay);
-            executor.schedule(
-                    () -> sendPart(part, dto),
-                    sendDelay,
-                    TimeUnit.MILLISECONDS
-            );
+            long typingTime = calculateDelayBySize(part);
 
-            delay += calculateDelayBySize(part);
+            long sendDelay = cumulativeDelay;
+
+            executor.schedule(() -> {
+                typingSimulation(dto, (int) typingTime);
+            }, sendDelay - typingTime, TimeUnit.MILLISECONDS);
+
+            executor.schedule(() -> {
+                sendPart(part, dto);
+            }, sendDelay, TimeUnit.MILLISECONDS);
+
+            cumulativeDelay += typingTime;
         }
     }
 
