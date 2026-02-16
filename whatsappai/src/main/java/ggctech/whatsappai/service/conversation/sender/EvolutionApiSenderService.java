@@ -53,7 +53,7 @@ public class EvolutionApiSenderService implements MessageSenderService {
                     sendPart(part, dto);
 
                     // Pequena pausa natural entre mensagens
-                    Thread.sleep(500);
+                    Thread.sleep(100);
                 }
 
             } catch (InterruptedException e) {

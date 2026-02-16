@@ -2,14 +2,15 @@ package ggctech.whatsappai.domain.destination;
 
 import ggctech.whatsappai.domain.BaseModel;
 import ggctech.whatsappai.domain.company.CompanyNumber;
-import ggctech.whatsappai.enums.DestinationType;
+import ggctech.whatsappai.enums.ActionType;
 import jakarta.persistence.*;
-
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Table(name = "service_destinations")
-public class ServiceDestination  extends BaseModel {
+@Table(name = "company_actions")
+@Getter @Setter
+public class CompanyAction extends BaseModel {
 
     @ManyToOne
     private CompanyNumber companyNumber;
@@ -19,15 +20,12 @@ public class ServiceDestination  extends BaseModel {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ElementCollection
-    private List<String> specialties;
-
-    private String destinationNumber;
-
     @Enumerated(EnumType.STRING)
-    private DestinationType type;
+    private ActionType type;
+
+    @Column(columnDefinition = "TEXT")
+    private String configJson;
 
     private boolean active;
-
-    private boolean aiEnabled;
 }
+

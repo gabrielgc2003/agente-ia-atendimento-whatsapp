@@ -63,7 +63,4 @@ public class LeadService {
         leadRepository.save(lead);
     }
 
-    public String getRoutes(String instanceId, String remoteJid) {
-      return null;
-    }
 }

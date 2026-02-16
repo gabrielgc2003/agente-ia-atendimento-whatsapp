@@ -12,9 +12,9 @@ openai:
 
 config:
   lock:
-    timer: ${LOCK_SECONDS}
+    timer: ${LOCK_SECONDS:20}
   finalize:
-    timer: ${FINALIZE_SECONDS}
+    timer: ${FINALIZE_SECONDS:30}
 
 logging:
   level:
