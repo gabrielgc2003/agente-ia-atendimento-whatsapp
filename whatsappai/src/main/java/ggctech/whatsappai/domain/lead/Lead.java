@@ -2,7 +2,6 @@ package ggctech.whatsappai.domain.lead;
 
 import ggctech.whatsappai.domain.BaseModel;
 import ggctech.whatsappai.domain.company.CompanyNumber;
-import ggctech.whatsappai.domain.destination.ServiceDestination;
 import ggctech.whatsappai.enums.LeadStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -22,9 +21,6 @@ public class Lead extends BaseModel {
     private String clientNumber;
 
     private String name;
-
-    @ManyToOne
-    private ServiceDestination serviceDestination;
 
     private boolean routingLocked;
 

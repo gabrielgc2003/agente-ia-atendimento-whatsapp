@@ -1,18 +1,15 @@
 package ggctech.whatsappai.service.conversation;
 
+import ggctech.whatsappai.domain.dto.AiResponse;
 import ggctech.whatsappai.domain.dto.IncomingMessageDTO;
-import ggctech.whatsappai.domain.lead.ChatHistory;
+import ggctech.whatsappai.domain.memory.ConversationState;
+import ggctech.whatsappai.domain.memory.ConversationSummary;
 import ggctech.whatsappai.enums.Sender;
-import ggctech.whatsappai.service.ai.openapi.OpenAiService;
+import ggctech.whatsappai.service.action.CompanyActionService;
 import ggctech.whatsappai.service.lead.ChatHistoryService;
 import ggctech.whatsappai.service.lead.LeadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +22,13 @@ public class ConversationFinalizer {
     private final PromptBuilder promptBuilder;
     private final MessageService messageService;
 
+    private final ConversationStateService stateService;
+    private final ConversationSummaryService summaryService;
+    private final ContextService contextService;
+    private final ActionExecutor actionExecutor;
+
+    private final CompanyActionService companyActionService;
+
     public void finalizeConversation(String conversationKey, IncomingMessageDTO dto) {
 
         String finalBuffer = bufferService.get(conversationKey);
@@ -33,10 +37,11 @@ public class ConversationFinalizer {
             return;
         }
 
+        // Limpa buffer e lock
         bufferService.delete(conversationKey);
         lockService.delete(conversationKey);
 
-        // 1️⃣ Persistir USER primeiro
+        // 1️⃣ Persistir mensagem USER (apenas auditoria)
         chatHistoryService.saveMessage(
                 dto.getInstanceId(),
                 dto.getRemoteJid(),
@@ -44,45 +49,75 @@ public class ConversationFinalizer {
                 Sender.USER
         );
 
-        // 2️⃣ Buscar histórico estruturado
-        List<Map<String, String>> history =
-                chatHistoryService.lastMessages(
-                        dto.getInstanceId(),
-                        dto.getRemoteJid()
-                );
+        // 2️⃣ Buscar ou criar memória estruturada
+        ConversationState state =
+                stateService.getOrCreate(conversationKey);
 
-        // 3️⃣ Base prompt + rotas
+        ConversationSummary summary =
+                summaryService.getOrCreate(conversationKey);
+
+        // 3️⃣ Atualizar memória com IA barata (context update)
+        var contextResult =
+                contextService.update(finalBuffer, state, summary);
+
+        state = contextResult.getState();
+        summary = contextResult.getSummary();
+
+        stateService.save(conversationKey, state);
+        summaryService.save(conversationKey, summary);
+
+        // 4️⃣ Montar prompt estruturado
         String basePrompt = dto.getMessageConfig().getBasePrompt();
-        String routes = leadService.getRoutes(
-                dto.getInstanceId(),
-                dto.getRemoteJid()
+
+        String routes = companyActionService.getActionsForAi(dto.getInstanceId());
+
+        String systemPrompt = promptBuilder.build(
+                basePrompt,
+                routes,
+                state,
+                summary
         );
 
-        String systemPrompt = promptBuilder.build(basePrompt, routes);
+        // 5️⃣ Chamar IA principal (resposta + ações + memória)
+        AiResponse aiResponse =
+                messageService.sendStructuredMessage(
+                        systemPrompt,
+                        finalBuffer
+                );
 
-        // 4️⃣ Montar lista final igual n8n
-        List<Map<String, String>> messages = new ArrayList<>();
+        if (aiResponse == null) {
+            return;
+        }
 
-        messages.add(Map.of(
-                "role", "system",
-                "content", systemPrompt
-        ));
+        // 6️⃣ Atualizar estado se IA retornou
+        if (aiResponse.getUpdatedState() != null) {
+            stateService.save(conversationKey, aiResponse.getUpdatedState());
+        }
 
-        messages.addAll(history);
+        // 7️⃣ Atualizar resumo se IA retornou
+        if (aiResponse.getUpdatedSummary() != null) {
+            summaryService.save(conversationKey, aiResponse.getUpdatedSummary());
+        }
 
-        // 5️⃣ Chamar OpenAI passando array real
-        String response = messageService.sendMessageToAgent(messages);
+        // 8️⃣ Executar ações estruturadas
+        if (aiResponse.getActions() != null &&
+                !aiResponse.getActions().isEmpty()) {
 
-        // 6️⃣ Persistir BOT
+            actionExecutor.execute(aiResponse.getActions(), dto);
+        }
+
+        // 9️⃣ Persistir BOT
         chatHistoryService.saveMessage(
                 dto.getInstanceId(),
                 dto.getRemoteJid(),
-                response,
+                aiResponse.getResponse(),
                 Sender.BOT
         );
 
-        messageService.sendMessageToUser(response, dto);
+        // 🔟 Enviar resposta ao usuário
+        messageService.sendMessageToUser(
+                aiResponse.getResponse(),
+                dto
+        );
     }
 }
-
-
