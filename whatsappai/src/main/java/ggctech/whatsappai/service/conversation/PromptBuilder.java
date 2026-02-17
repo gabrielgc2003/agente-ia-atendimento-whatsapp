@@ -8,7 +8,7 @@ import tools.jackson.databind.ObjectMapper;
 @Component
 public class PromptBuilder {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final tools.jackson.databind.ObjectMapper objectMapper = new ObjectMapper();
 
     public String build(
             String basePrompt,
@@ -39,6 +39,60 @@ public class PromptBuilder {
 
         ==============================
 
+        [GESTÃO DE ESTÁGIO - OBRIGATÓRIO]
+
+        Você deve definir dinamicamente o campo "stage"
+        representando claramente o momento atual da conversa.
+
+        Regras obrigatórias:
+
+        - O stage deve ser curto.
+        - Usar snake_case.
+        - Não conter espaços.
+        - Representar intenção ou fase real da conversa.
+        - Nunca usar nomes genéricos como "etapa1" ou "fase_final".
+        - Nunca retornar ao stage anterior,
+          exceto se o usuário mudar explicitamente a intenção.
+        - O stage deve refletir progressão real.
+        - Se a conversa evoluir semanticamente,
+          o stage deve evoluir também.
+
+        Exemplos válidos:
+        - coletando_idade
+        - identificando_tipo_consulta
+        - tratando_objeção_valor
+        - redirecionando_para_convênio
+        - aguardando_decisao
+        - conversa_encerrada
+
+        ==============================
+        [DETECÇÃO DE NOVA CONVERSA]
+        
+        Se o usuário:
+        - Iniciar com nova saudação após longo intervalo
+        - Mudar completamente o assunto
+        - Iniciar novo pedido diferente do anterior
+        - Retomar após conversa encerrada
+        
+        Você pode alterar o stage para: start
+        
+        Se fizer isso:
+        - Limpe fields irrelevantes
+        - Reinicie coleta de informações
+        - Atualize o resumo coerentemente
+        
+        ==============================
+        [ANTI-REPETIÇÃO E PROGRESSÃO]
+
+        - Nunca repetir semanticamente a última resposta enviada.
+        - Nunca reiniciar a conversa se já houver contexto.
+        - Nunca repetir explicações já dadas.
+        - Sempre mover a conversa um passo adiante.
+        - Se o usuário já confirmou algo, não reconfirmar.
+        - Evitar duplicação de informação.
+
+        ==============================
+
         INSTRUÇÕES OBRIGATÓRIAS:
 
         1. Responda EXCLUSIVAMENTE em JSON válido.
@@ -46,6 +100,7 @@ public class PromptBuilder {
         3. Nunca use markdown.
         4. Nunca explique o JSON.
         5. Nunca quebre o formato.
+        6. Nunca retorne campos null.
 
         Formato obrigatório:
 
@@ -66,14 +121,16 @@ public class PromptBuilder {
           ]
         }
 
-        Regras:
+        Regras adicionais:
+
         - Se não houver ação necessária, retornar obrigatoriamente:
           "actions": []
-        - Nunca retorne objetos com type null.
-        - Nunca retorne array com item vazio.
-        - Nunca retorne action sem type.
-        - Atualize o estado apenas se houver mudança real
-        - Atualize o resumo apenas se houver informação nova
+        - Nunca retornar array com item vazio.
+        - Nunca retornar action sem action_id.
+        - Nunca retornar action com payload vazio se a ação exigir dados.
+        - Atualizar o estado apenas se houver mudança real.
+        - Atualizar o resumo apenas se houver informação nova relevante.
+        - O campo response deve ser natural e conversacional (formato WhatsApp).
         """.formatted(
                 basePrompt,
                 routes,
@@ -91,4 +148,3 @@ public class PromptBuilder {
         }
     }
 }
-
