@@ -94,7 +94,7 @@ public class ConversationFinalizer {
         chatHistoryService.saveMessage(
                 dto.getInstanceId(),
                 dto.getRemoteJid(),
-                aiResponse.getResponse(),
+                aiResponse.toString(),
                 Sender.BOT
         );
 
