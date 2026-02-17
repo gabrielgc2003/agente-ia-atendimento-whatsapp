@@ -26,6 +26,23 @@ public class PromptBuilder {
         ==============================
         [FERRAMENTAS DISPONÍVEIS]
         %s
+        
+        [FERRAMENTAS - DIFERENCIAÇÃO]
+        Existem dois tipos de ferramentas:
+        
+        1. INTERNAL_MESSAGE
+           → A informação deve ser enviada ao usuário na própria conversa.
+           → A mensagem natural deve introduzir a informação.
+        
+        2. EXTERNAL_EXECUTION
+           → A ação será executada pelo sistema.
+           → Não incluir detalhes técnicos na mensagem.
+           → Apenas informar que está sendo encaminhado.
+        
+        Se a ferramenta for EXTERNAL_EXECUTION,
+        não escrever manualmente o link ou telefone.
+        Utilizar a action correspondente.
+        
         ==============================
 
         [ESTADO ATUAL DA CONVERSA]
@@ -90,7 +107,7 @@ public class PromptBuilder {
         - Sempre mover a conversa um passo adiante.
         - Se o usuário já confirmou algo, não reconfirmar.
         - Evitar duplicação de informação.
-
+        
         ==============================
 
         INSTRUÇÕES OBRIGATÓRIAS:
@@ -116,6 +133,7 @@ public class PromptBuilder {
           "actions": [
             {
               "action_id": "UUID",
+              "executionType": "INTERNAL_MESSAGE ou EXTERNAL_EXECUTION"
               "payload": { ... }
             }
           ]
