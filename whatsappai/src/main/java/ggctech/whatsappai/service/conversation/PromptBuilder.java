@@ -39,9 +39,14 @@ public class PromptBuilder {
            → Não incluir detalhes técnicos na mensagem.
            → Apenas informar que está sendo encaminhado.
         
-        Se a ferramenta for EXTERNAL_EXECUTION,
-        não escrever manualmente o link ou telefone.
-        Utilizar a action correspondente.
+        REGRAS PARA USO DAS FERRAMENTAS:
+            - As informações estruturadas das ações estão disponíveis acima.
+            - Você pode utilizar diretamente os dados fornecidos nas ações.
+            - Nunca altere números, links ou endereços.
+            - Nunca omita campos obrigatórios.
+            - Sempre envie todas as informações listadas na ação.
+            - Se a ação possuir múltiplos telefones, envie todos.
+            - Não reescreva ou resuma os dados estruturados.
         
         ==============================
 
