@@ -67,7 +67,11 @@ public class PromptBuilder {
         }
 
         Regras:
-        - Se não houver ação, retornar "actions": []
+        - Se não houver ação necessária, retornar obrigatoriamente:
+          "actions": []
+        - Nunca retorne objetos com type null.
+        - Nunca retorne array com item vazio.
+        - Nunca retorne action sem type.
         - Atualize o estado apenas se houver mudança real
         - Atualize o resumo apenas se houver informação nova
         """.formatted(

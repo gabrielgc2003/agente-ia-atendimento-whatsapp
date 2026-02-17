@@ -1,5 +1,6 @@
 package ggctech.whatsappai.service.conversation;
 
+import ggctech.whatsappai.domain.dto.AiAction;
 import ggctech.whatsappai.domain.dto.AiResponse;
 import ggctech.whatsappai.domain.dto.IncomingMessageDTO;
 import ggctech.whatsappai.domain.memory.ConversationState;
@@ -11,6 +12,8 @@ import ggctech.whatsappai.service.lead.ChatHistoryService;
 import ggctech.whatsappai.service.lead.LeadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -111,8 +114,13 @@ public class ConversationFinalizer {
         // 8️⃣ Executar ações estruturadas
         if (aiResponse.getActions() != null &&
                 !aiResponse.getActions().isEmpty()) {
+            List<AiAction> validActions = aiResponse.getActions()
+                    .stream()
+                    .filter(a -> a != null)
+                    .filter(a -> a.getType() != null && !a.getType().isBlank())
+                    .toList();
 
-            actionExecutor.execute(aiResponse.getActions(), dto);
+            actionExecutor.execute(validActions, dto);
         }
 
         // 🔟 Enviar resposta ao usuário
