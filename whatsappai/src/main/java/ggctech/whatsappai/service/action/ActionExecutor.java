@@ -1,4 +1,4 @@
-package ggctech.whatsappai.service.conversation;
+package ggctech.whatsappai.service.action;
 
 import ggctech.whatsappai.domain.dto.AiAction;
 import ggctech.whatsappai.domain.dto.IncomingMessageDTO;
@@ -13,7 +13,10 @@ public class ActionExecutor {
 
     public void execute(List<AiAction> actions, IncomingMessageDTO dto) {
 
-        if (actions == null) return;
+
+        if (actions == null || actions.isEmpty()) {
+            return;
+        }
 
         for (AiAction action : actions) {
 

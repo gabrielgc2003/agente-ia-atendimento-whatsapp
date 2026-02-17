@@ -5,6 +5,7 @@ import ggctech.whatsappai.domain.dto.IncomingMessageDTO;
 import ggctech.whatsappai.domain.memory.ConversationState;
 import ggctech.whatsappai.domain.memory.ConversationSummary;
 import ggctech.whatsappai.enums.Sender;
+import ggctech.whatsappai.service.action.ActionExecutor;
 import ggctech.whatsappai.service.action.CompanyActionService;
 import ggctech.whatsappai.service.lead.ChatHistoryService;
 import ggctech.whatsappai.service.lead.LeadService;
@@ -89,6 +90,14 @@ public class ConversationFinalizer {
             return;
         }
 
+        // 9️⃣ Persistir BOT
+        chatHistoryService.saveMessage(
+                dto.getInstanceId(),
+                dto.getRemoteJid(),
+                aiResponse.getResponse(),
+                Sender.BOT
+        );
+
         // 6️⃣ Atualizar estado se IA retornou
         if (aiResponse.getUpdatedState() != null) {
             stateService.save(conversationKey, aiResponse.getUpdatedState());
@@ -105,14 +114,6 @@ public class ConversationFinalizer {
 
             actionExecutor.execute(aiResponse.getActions(), dto);
         }
-
-        // 9️⃣ Persistir BOT
-        chatHistoryService.saveMessage(
-                dto.getInstanceId(),
-                dto.getRemoteJid(),
-                aiResponse.getResponse(),
-                Sender.BOT
-        );
 
         // 🔟 Enviar resposta ao usuário
         messageService.sendMessageToUser(
