@@ -32,6 +32,7 @@ public class CompanyActionService {
             sb.append("Nome: ").append(action.getName()).append("\n");
             sb.append("Tipo: ").append(action.getType()).append("\n");
             sb.append("Descrição: ").append(action.getDescription()).append("\n");
+            sb.append("Tipo de Ação: ").append(action.getExecutionType()).append("\n");
 
             if (action.getConfigJson() != null && !action.getConfigJson().isBlank()) {
                 sb.append("Configuração:\n");
@@ -46,6 +47,7 @@ public class CompanyActionService {
 
         {
           "action_id": "UUID",
+          "executionType": "INTERNAL_MESSAGE ou EXTERNAL_EXECUTION"
           "payload": { ... }
         }
 

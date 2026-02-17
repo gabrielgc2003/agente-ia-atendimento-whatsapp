@@ -2,6 +2,7 @@ package ggctech.whatsappai.domain.destination;
 
 import ggctech.whatsappai.domain.BaseModel;
 import ggctech.whatsappai.domain.company.CompanyNumber;
+import ggctech.whatsappai.enums.ActionExecutionType;
 import ggctech.whatsappai.enums.ActionType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,6 +26,9 @@ public class CompanyAction extends BaseModel {
 
     @Column(columnDefinition = "TEXT")
     private String configJson;
+
+    @Enumerated(EnumType.STRING)
+    private ActionExecutionType executionType;
 
     private boolean active;
 }
