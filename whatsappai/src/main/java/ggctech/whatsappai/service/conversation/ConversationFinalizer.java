@@ -3,6 +3,7 @@ package ggctech.whatsappai.service.conversation;
 import ggctech.whatsappai.domain.dto.AiAction;
 import ggctech.whatsappai.domain.dto.AiResponse;
 import ggctech.whatsappai.domain.dto.IncomingMessageDTO;
+import ggctech.whatsappai.domain.lead.Lead;
 import ggctech.whatsappai.domain.memory.ConversationState;
 import ggctech.whatsappai.domain.memory.ConversationSummary;
 import ggctech.whatsappai.enums.Sender;
@@ -34,7 +35,10 @@ public class ConversationFinalizer {
     private final CompanyActionService companyActionService;
 
     public void finalizeConversation(String conversationKey, IncomingMessageDTO dto) {
-
+        Lead lead = leadService.getLead(dto.getInstanceId(), dto.getRemoteJid());
+        if (leadService.isBlocked(lead)) {
+            return;
+        }
         String finalBuffer = bufferService.get(conversationKey);
 
         if (finalBuffer == null || finalBuffer.isBlank()) {
