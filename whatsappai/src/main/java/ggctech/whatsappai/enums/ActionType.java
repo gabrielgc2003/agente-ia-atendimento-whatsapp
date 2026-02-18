@@ -5,5 +5,6 @@ public enum ActionType {
     SEND_EMAIL,
     SEND_LINK,
     REGISTER_SPREADSHEET,
-    CALL_WEBHOOK
+    CALL_WEBHOOK,
+    SEND_PAYMENT_INFO
 }
