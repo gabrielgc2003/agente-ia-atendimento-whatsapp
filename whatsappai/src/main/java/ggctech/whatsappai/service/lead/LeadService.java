@@ -63,4 +63,8 @@ public class LeadService {
         leadRepository.save(lead);
     }
 
+    public Lead getLead(String instanceId, String remoteJid) {
+        return leadRepository.findByCompanyNumber_InstanceIdAndClientNumber(instanceId, remoteJid)
+                .orElseThrow(() -> new RuntimeException("Lead not found"));
+    }
 }
