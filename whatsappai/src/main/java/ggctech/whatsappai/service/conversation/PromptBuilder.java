@@ -115,6 +115,9 @@ public class PromptBuilder {
         - Sempre preservar dados anteriores.
         - Apenas adicionar ou atualizar se houver nova informação.
         - Nunca retornar fields vazio se já houver dados.
+        - Nunca inventar informações não presentes no basePrompt ou nas ferramentas.
+        - Se não houver dados estruturados, não presumir.
+        - Em caso de dúvida, pedir confirmação.
         
         ==================================================
         
