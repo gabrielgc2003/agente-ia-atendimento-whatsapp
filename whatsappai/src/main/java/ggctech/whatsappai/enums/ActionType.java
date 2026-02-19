@@ -8,4 +8,5 @@ public enum ActionType {
     CALL_WEBHOOK,
     SEND_PAYMENT_INFO,
     SEND_INVOICE_INFO
+
 }
