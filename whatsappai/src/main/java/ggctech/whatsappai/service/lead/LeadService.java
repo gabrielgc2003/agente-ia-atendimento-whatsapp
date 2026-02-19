@@ -53,6 +53,7 @@ public class LeadService {
                 // bloqueia por 3 horas
                 Instant.now().plusSeconds(3 * 60 * 60)
         );
+        leadRepository.save(lead);
     }
 
     public void blockTemporarily(CompanyNumber companyNumber, String remoteJid, Duration duration) {
