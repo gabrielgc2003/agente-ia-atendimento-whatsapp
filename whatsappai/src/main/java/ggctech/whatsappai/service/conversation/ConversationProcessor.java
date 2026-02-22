@@ -21,19 +21,20 @@ public class ConversationProcessor {
 
         // 1️⃣ Sempre transforma em String
         String text = messageProcessorRegistry.process(message);
+        if (text == null) {
+            // 2️⃣ Concatena no buffer
+            bufferService.append(conversationKey, text);
 
-        // 2️⃣ Concatena no buffer
-        bufferService.append(conversationKey, text);
+            // 3️⃣ Se lock existe, não faz mais nada
+            if (lockService.exists(conversationKey)) {
+                return;
+            }
 
-        // 3️⃣ Se lock existe, não faz mais nada
-        if (lockService.exists(conversationKey)) {
-            return;
-        }
-
-        // 4️⃣ Se não existe, cria lock
-        if (lockService.create(conversationKey)) {
-            // 5️⃣ Agenda finalização em 30s
-            scheduler.schedule(conversationKey, message);
+            // 4️⃣ Se não existe, cria lock
+            if (lockService.create(conversationKey)) {
+                // 5️⃣ Agenda finalização em 30s
+                scheduler.schedule(conversationKey, message);
+            }
         }
     }
 }
