@@ -21,8 +21,9 @@ public class ConversationProcessor {
 
         // 1️⃣ Sempre transforma em String
         String text = messageProcessorRegistry.process(message);
-
-        // 2️⃣ Concatena no buffer
+        if (text == null || text.isEmpty() || text.equals("")) {
+            return;
+        }        // 2️⃣ Concatena no buffer
         bufferService.append(conversationKey, text);
 
         // 3️⃣ Se lock existe, não faz mais nada

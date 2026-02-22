@@ -28,9 +28,7 @@ public class MessageProcessorRegistry {
         MessageProcessor processor = processors.get(type);
 
         if (processor == null) {
-            throw new IllegalArgumentException(
-                    "No processor found for message type: " + type
-            );
+            return "";
         }
 
         return processor.process(message);
