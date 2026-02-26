@@ -23,7 +23,8 @@ public class ConversationProcessor {
         String text = messageProcessorRegistry.process(message);
         if (text == null || text.isEmpty() || text.equals("")) {
             return;
-        }        // 2️⃣ Concatena no buffer
+        }
+        // 2️⃣ Concatena no buffer
         bufferService.append(conversationKey, text);
 
         // 3️⃣ Se lock existe, não faz mais nada
