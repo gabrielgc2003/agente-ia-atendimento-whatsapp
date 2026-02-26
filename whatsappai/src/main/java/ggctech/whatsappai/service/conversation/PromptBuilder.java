@@ -34,7 +34,8 @@ public class PromptBuilder {
            - Nunca omitir telefones, links ou endereços.
            - Nunca resumir ou alterar valores.
            - Nunca dizer apenas "vou te enviar".
-           - A resposta já deve conter todas as informações.
+           - A resposta já deve conter todas as informações
+           - Caso sinalize a intenção do envio, deve ser enviado na mesma resposta.
         
         2) Quando a ação for do tipo EXTERNAL_EXECUTION:
            - Não incluir detalhes técnicos no response.
