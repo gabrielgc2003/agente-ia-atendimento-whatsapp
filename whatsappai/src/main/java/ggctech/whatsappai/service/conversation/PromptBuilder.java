@@ -64,19 +64,28 @@ public class PromptBuilder {
         [RESUMO ESTRUTURADO]
         %s
         
-        ==================================================
+        ==================================================  
+        [GESTÃO DE ESTÁGIO — CONTROLE RÍGIDO]        
+        Você deve evoluir o campo "stage" progressivamente.
         
-        [GESTÃO DE ESTÁGIO — OBRIGATÓRIO]
+        Regras obrigatórias:
         
-        Você deve definir dinamicamente o campo "stage".
-        
-        Regras:
         - Usar snake_case.
         - Curto e objetivo.
         - Representar momento real da conversa.
         - Nunca usar nomes genéricos.
-        - Nunca retroceder estágio sem mudança explícita do usuário.
-        - Se houver nova intenção clara, atualizar o stage.
+        - Nunca retroceder estágio.
+        - Nunca redefinir para "start" automaticamente.
+        - Nunca redefinir para "start" se já houver fields preenchidos.
+        - Nunca redefinir para "start" por causa de emoji, saudação ou mensagem curta.
+        - Nunca apagar dados já coletados.
+        - Se houver nova intenção clara, atualizar para novo estágio coerente.
+        - Se o usuário apenas responder algo curto (ex: nome), apenas avançar coleta.
+        - Nunca reiniciar fluxo já iniciado.
+        
+        O stage só pode evoluir.
+        Nunca retroceder.
+        Nunca resetar sem regra explícita.
         
         Exemplos válidos:
         - start
@@ -90,46 +99,70 @@ public class PromptBuilder {
         - conversa_encerrada
         
         ==================================================
+        [DETECÇÃO DE NOVA CONVERSA — REGRA RESTRITIVA]
+           
+        Você só pode definir stage = start se TODAS as condições abaixo forem verdadeiras:
         
-        [DETECÇÃO DE NOVA CONVERSA]
+        1) O stage atual for exatamente "conversa_encerrada"
+        E
+        2) O usuário iniciar explicitamente uma nova conversa
+        E
+        3) Não houver intenção ativa pendente
+        E
+        4) Não houver fluxo em andamento
         
-        Se o usuário:
-        - Iniciar com nova saudação após longo intervalo
-        - Mudar completamente o assunto
-        - Retomar após conversa encerrada
+        Nunca redefinir para start se:
+        - Já houver nome_responsavel preenchido
+        - Já houver nome_crianca ou idade_crianca preenchidos
+        - A conversa estiver ativa
+        - O usuário enviar apenas emoji
+        - O usuário enviar apenas saudação
+        - O usuário enviar mensagem curta
         
-        Você pode definir:
-        stage = start
-        
-        Se fizer isso:
-        - Limpar apenas campos irrelevantes
-        - Preservar nome_responsavel se ainda fizer sentido
-        - Reiniciar coleta de informações
-        - Atualizar o resumo coerentemente
+        Se houver dúvida, manter stage atual.
         
         ==================================================
         
-        [REGRA DE PERSISTÊNCIA DE DADOS]
+        [REGRA DE PERSISTÊNCIA DE DADOS — CRÍTICO]
         
         - Nunca apagar campos já existentes.
         - Nunca remover nome_responsavel, nome_crianca ou idade_crianca se já estiverem preenchidos.
-        - Sempre preservar dados anteriores.
-        - Apenas adicionar ou atualizar se houver nova informação.
         - Nunca retornar fields vazio se já houver dados.
-        - Nunca inventar informações não presentes no basePrompt ou nas ferramentas.
-        - Se não houver dados estruturados, não presumir.
+        - Nunca sobrescrever campo preenchido com null ou vazio.
+        - Apenas adicionar novos campos ou atualizar se houver nova informação explícita.
+        - Nunca inventar informações.
         - Em caso de dúvida, pedir confirmação.
         
         ==================================================
-        
+                
         [ANTI-REPETIÇÃO E PROGRESSÃO]
         
         - Nunca repetir semanticamente a última resposta.
+        - Nunca repetir apresentação se já realizada.
         - Nunca reiniciar explicações já dadas.
         - Nunca reconfirmar algo já confirmado.
+        - Nunca reenviar contatos já enviados.
+        - Nunca repetir link já enviado.
         - Sempre mover a conversa um passo adiante.
-        - Nunca duplicar envio de contatos já enviados.
         
+        Se o usuário enviar:
+        - Apenas emoji
+        - Apenas saudação
+        - Apenas confirmação curta (sim, ok, 👍)
+        
+        Considerar como continuação da conversa.
+        Nunca reiniciar fluxo por isso.
+        Nunca redefinir stage por isso.
+        
+        ==================================================
+        [PROTEÇÃO CONTRA LOOP]
+                
+        Se perceber que a resposta seria muito semelhante à anterior,
+        reestruture a mensagem para avançar o fluxo.
+        
+        Nunca entrar em loop.
+        Nunca repetir padrão de resposta.
+        Sempre evoluir a conversa.
         ==================================================
         
         INSTRUÇÕES OBRIGATÓRIAS DE FORMATO:
