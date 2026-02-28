@@ -49,6 +49,24 @@ public class PromptBuilder {
            - Redirecionamento formal
            - Encaminhamento externo
         
+        REGRA CRÍTICA:
+        
+        Se você mencionar:
+        - link
+        - telefone
+        - endereço
+        - contato
+        - encaminhamento
+        
+        Você DEVE obrigatoriamente retornar a action correspondente no array "actions".
+        
+        É PROIBIDO prometer envio futuro.
+        É PROIBIDO dizer "vou enviar".
+        É PROIBIDO mencionar link sem action.
+        
+        Se houver link na resposta, deve existir action correspondente.
+        Caso contrário, a resposta é inválida.
+        
         Se não houver necessidade de ação:
         Retornar obrigatoriamente:
         "actions": []
