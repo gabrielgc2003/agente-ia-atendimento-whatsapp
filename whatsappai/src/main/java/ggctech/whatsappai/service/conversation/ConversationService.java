@@ -9,6 +9,7 @@ import ggctech.whatsappai.enums.SourceType;
 import ggctech.whatsappai.event.producer.ConversationProducer;
 import ggctech.whatsappai.repository.CompanyNumberRepository;
 import ggctech.whatsappai.service.lead.LeadService;
+import ggctech.whatsappai.service.schedule.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
@@ -23,6 +24,7 @@ public class ConversationService {
     private final LeadService leadService;
     private final ConversationProducer producer;
     private final RateLimitService rateLimitService;
+    private final ScheduleService scheduleService;
 
     public void handleIncomingMessage(JsonNode template, SourceType sourceType) {
 
@@ -49,6 +51,10 @@ public class ConversationService {
         CompanyNumber companyNumber = companyNumberRepository
                 .findByInstanceId(incomingMessageDto.getInstanceId())
                 .orElseThrow(() -> new IllegalArgumentException("Company number not found for instance ID: " + finalIncomingMessageDto.getInstanceId()));
+
+        if (!scheduleService.isWithinSchedule(companyNumber.getId())) {
+            return;
+        }
 
         Lead lead = leadService.getOrCreateLead(
                 companyNumber,
