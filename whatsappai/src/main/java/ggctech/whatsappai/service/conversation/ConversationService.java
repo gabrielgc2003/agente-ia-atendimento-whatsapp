@@ -52,6 +52,9 @@ public class ConversationService {
                 .findByInstanceId(incomingMessageDto.getInstanceId())
                 .orElseThrow(() -> new IllegalArgumentException("Company number not found for instance ID: " + finalIncomingMessageDto.getInstanceId()));
 
+        if (!companyNumber.isAiEnabled()) {
+            return;
+        }
         if (!scheduleService.isWithinSchedule(companyNumber.getId())) {
             return;
         }
