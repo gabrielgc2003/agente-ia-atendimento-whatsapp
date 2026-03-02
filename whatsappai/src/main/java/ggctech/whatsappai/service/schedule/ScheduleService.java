@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ public class ScheduleService {
      */
     public boolean isWithinSchedule(UUID companyNumberId) {
 
-        LocalDateTime now       = LocalDateTime.now();
+        LocalDateTime now       = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
         DayOfWeek today      = now.getDayOfWeek();
         LocalTime currentTime = now.toLocalTime();
 
