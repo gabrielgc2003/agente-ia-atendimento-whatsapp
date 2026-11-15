@@ -1,14 +1,14 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5434/whatsappai_db
-    username: postgres
-    password: admin
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   data:
     redis:
       host: localhost
       port: 6381
-      password: 2129f0354d1e356174e5
+      password: ${REDIS_PASSWORD:redis}
 
   jpa:
     open-in-view: false
@@ -26,7 +26,7 @@ spring:
 
 evolution:
   api:
-    base-url: http://localhost:8081
+    base-url: ${EVOLUTION_API_BASE_URL:http://localhost:8081}
 
 logging:
   level:
